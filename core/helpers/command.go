@@ -41,7 +41,6 @@ func (a *cmdConf) getCommand() {
 		Short: "gather bgptools and send to minio server",
 		Args:  cobra.NoArgs,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("minio running ...")
 			pMinio := ProcessMinioMode{
 				cmdConf: &cmdConf{
 					configs: a.configs,

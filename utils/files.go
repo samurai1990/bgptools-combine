@@ -88,7 +88,7 @@ func (f *Files) saveChunk(lines []string, index int) error {
 	chunkFileName := fmt.Sprintf("%s/chunk_%d.jsonl", BaseChunkPath, index)
 	chunkFile, err := os.Create(chunkFileName)
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		return err
 	}
 	defer chunkFile.Close()
