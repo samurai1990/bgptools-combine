@@ -1,11 +1,11 @@
-.PHONY: build schedule
+.PHONY: build schedule-minio schedule-elastic-minio schedule-elastic-web
 
 
 CURRENT_DIR := $(shell pwd)
 
-LOGROTATE_CONF := /etc/logrotate.d/bgp-elastic-uploader
+LOGROTATE_CONF := /etc/logrotate.d/bgptools-combine
 
-LOG_PATH := /var/log/bgp-elastic-uploader
+LOG_PATH := /var/log/bgptools-combine
 
 define LOGROTATE_CONF_CONTENT
 $(LOG_PATH)/*.log {
@@ -27,8 +27,14 @@ init:
 	@echo "$$LOGROTATE_CONF_CONTENT" > $(LOGROTATE_CONF)
 
 build:init
-	-rm bgp-elastic-uploader
-	@go build -o bgp-elastic-uploader
+	-rm bgptools-combine
+	@go build -o bgptools-combine
 
-schedule:
-	@(crontab -l ; echo "22 5 * * 0 cd $(CURRENT_DIR); ./bgp-elastic-uploader") | crontab -
+schedule-minio:
+	@(crontab -l ; echo "22 5 * * * cd $(CURRENT_DIR); ./bgptools-combine minio") | crontab -
+
+schedule-elastic-minio:
+	@(crontab -l ; echo "22 5 * * * cd $(CURRENT_DIR); ./bgptools-combine elastic -i minio") | crontab -
+
+schedule-elastic-web:
+	@(crontab -l ; echo "22 5 * * * cd $(CURRENT_DIR); ./bgptools-combine elastic -i web") | crontab -
