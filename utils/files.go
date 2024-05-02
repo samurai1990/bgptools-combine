@@ -2,10 +2,10 @@ package utils
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type Files struct {
@@ -33,10 +33,44 @@ func Remove(arg any) {
 	}
 }
 
-func RemoveTmpDir() {
+func RemoveTmpDir() error {
 	if err := os.RemoveAll(TempPath); err != nil {
-		log.Fatalln(err)
+		return err
 	}
+	files, err := WalkDir("/tmp", "rosedb-temp*")
+	if err != nil {
+		return err
+	}
+	for _, file := range files {
+		absolutePath := fmt.Sprintf("/tmp/%s", file)
+		if err := os.RemoveAll(absolutePath); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func WalkDir(root, exts string) ([]string, error) {
+	files, err := os.ReadDir(root)
+	if err != nil {
+		return nil, err
+	}
+
+	var matchedFiles []string
+	for _, file := range files {
+		matched, err := filepath.Match("rosedb-temp*", file.Name())
+		if err != nil {
+			return nil, err
+		}
+		if matched {
+			matchedFiles = append(matchedFiles, file.Name())
+		}
+	}
+	for _, file := range matchedFiles {
+		fmt.Println(file)
+	}
+
+	return matchedFiles, err
 }
 
 func EnsureFiles(file string) error {
@@ -105,13 +139,18 @@ func (f *Files) saveChunk(lines []string, index int) error {
 	return nil
 }
 
-func EnsureDir(name string) error {
-	_, err := os.Open(name)
-	if errors.Is(err, os.ErrNotExist) {
-		err := os.Mkdir(name, os.FileMode(0760))
-		if err != nil {
+func EnsureDir() error {
+
+	if err := RemoveTmpDir(); err == nil {
+		if err := os.Mkdir(TempPath, os.FileMode(0760)); err != nil {
 			return err
 		}
+		if err := os.Mkdir(BaseChunkPath, os.FileMode(0760)); err != nil {
+			return err
+		}
+
+	} else {
+		log.Fatalln(err)
 	}
 	return nil
 }
