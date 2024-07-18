@@ -43,8 +43,5 @@ func (c *Config) LoadConfig(path string) error {
 		log.Fatal(err)
 	}
 
-	if err := EnsureDir(); err != nil {
-		return err
-	}
 	return nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bgptools/core/helpers"
+	ut "bgptools/utils"
 	"log"
 	"os"
 )
@@ -16,6 +17,10 @@ func main() {
 	log.SetOutput(logFile)
 	log.SetFlags(log.Lshortfile | log.LstdFlags)
 	defer logFile.Close()
+
+	if err := ut.Initialize(); err != nil {
+		log.Fatalf("Initialization has been failing with an error message:[%v] ", err)
+	}
 
 	helpers.Execute()
 

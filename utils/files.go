@@ -34,9 +34,7 @@ func Remove(arg any) {
 }
 
 func RemoveTmpDir() error {
-	if err := os.RemoveAll(TempPath); err != nil {
-		return err
-	}
+
 	files, err := WalkDir("/tmp", "rosedb-temp*")
 	if err != nil {
 		return err
@@ -46,6 +44,9 @@ func RemoveTmpDir() error {
 		if err := os.RemoveAll(absolutePath); err != nil {
 			return err
 		}
+	}
+	if err := os.RemoveAll(TempPath); err != nil {
+		return err
 	}
 	return nil
 }
@@ -66,10 +67,6 @@ func WalkDir(root, exts string) ([]string, error) {
 			matchedFiles = append(matchedFiles, file.Name())
 		}
 	}
-	for _, file := range matchedFiles {
-		fmt.Println(file)
-	}
-
 	return matchedFiles, err
 }
 
@@ -142,15 +139,22 @@ func (f *Files) saveChunk(lines []string, index int) error {
 func EnsureDir() error {
 
 	if err := RemoveTmpDir(); err == nil {
-		if err := os.Mkdir(TempPath, os.FileMode(0760)); err != nil {
+		if err := os.Mkdir(TempPath, os.FileMode(0766)); err != nil {
 			return err
 		}
-		if err := os.Mkdir(BaseChunkPath, os.FileMode(0760)); err != nil {
+		if err := os.Mkdir(BaseChunkPath, os.FileMode(0766)); err != nil {
 			return err
 		}
 
 	} else {
 		log.Fatalln(err)
+	}
+	return nil
+}
+
+func Initialize() error {
+	if err := EnsureDir(); err != nil {
+		return err
 	}
 	return nil
 }
